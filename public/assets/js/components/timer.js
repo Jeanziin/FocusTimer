@@ -1,61 +1,66 @@
+import Sounds from "./sounds.js";
+
 export default function Timer({
-    minutesDisplay,
-    secondsDisplay,
-    resetControls,
-    minutes
-}){
+  minutesDisplay,
+  secondsDisplay,
+  resetControls,
+  sound
+}) {
+  let timerTimeOut
+  let minutes = Number(minutesDisplay.textContent)
 
-    let timerTimeOut;
-function updateDisplay(minutes, seconds){
-    minutesDisplay.textContent = String(minutes).padStart(2, "0");
-    secondsDisplay.textContent = String(seconds).padStart(2, "0");
-}
-
-function reset()
-{
-    updateDisplay(minutes, 0);
+  function updateDisplay(newMinutes, seconds) {
+ 
+    newMinutes = newMinutes === undefined ? minutes : newMinutes
+    seconds = seconds === undefined ? 0 : seconds
+    minutesDisplay.textContent = String(newMinutes).padStart(2,'0')
+    secondsDisplay.textContent = String(seconds).padStart(2,'0')
+  }
+  
+  function reset() {
+    updateDisplay(minutes, 0) 
     clearTimeout(timerTimeOut)
-}
+  }
+  
+  function countdown() {
+    timerTimeOut = setTimeout(function () {
+      let seconds = Number(secondsDisplay.textContent)
+      let minutes = Number(minutesDisplay.textContent)
+      let isFinished = minutes <= 0 && seconds <= 0
+  
+      updateDisplay(minutes, 0)
+  
+      if (isFinished) {
+        resetControls()
+        updateDisplay()
+        Sounds().timeEnd()
+        return
+      }
+  
+      if (seconds <= 0) {
+        seconds = 60
+        --minutes //decrementar o minutes
+      }
+  
+      updateDisplay(minutes, String(seconds -1))
+  
+      countdown()
+    }, 1000) 
+  }
 
-function countDown()
-{
-    timerTimeOut = setTimeout(function() {
-        let seconds = Number(secondsDisplay.textContent) 
-        let minutes = Number(minutesDisplay.textContent)
-
-        updateDisplay(minutes, 0);
-        
-        if (minutes <= 0){
-            resetControls()
-            return
-        }
-        
-
-        if(seconds <= 0){
-            seconds = 60
-
-          --minutes
-        }
-            updateDisplay(minutes, String(seconds - 1));
-       
-        countDown();
-    }, 1000)
-
-}
-
-function updateMinutes(newMinutes) {
+  function updateMinutes(newMinutes) {
     minutes = newMinutes
-}
+  }
 
-function hold(){
-    clearTimeout(timerTimeOut);
-}
+  function holdTheTime() {
+    clearTimeout(timerTimeOut)
+  }
 
-    return  {
-        countDown,
-        reset,
-        updateDisplay,
-        updateMinutes,
-        hold
-    }
+  return {
+    countdown,
+    reset,
+    updateDisplay,
+    updateMinutes,
+    holdTheTime,
+  }
 }
